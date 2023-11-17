@@ -74,7 +74,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+public class SummaryStatistics implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -85,6 +85,22 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	{
 
 	}
+	
+	private int characterExpressionCount;
+    private int integerExpressionCount;
+	
+	public SummaryStatistics() {
+        characterExpressionCount = 0;
+        integerExpressionCount = 0;
+    }
+	
+    public int getCharacterExpressionCount() {
+        return characterExpressionCount;
+    }
+
+    public int getIntegerExpressionCount() {
+        return integerExpressionCount;
+    }
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -303,6 +319,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	@Override
 	public AbstractSyntaxTree visitCharacterExpression(CharacterExpression ast, Void arg) {
 		ast.CL.visit(this);
+		characterExpressionCount++;
 		return null;
 	}
 
@@ -331,6 +348,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIntegerExpression(IntegerExpression ast, Void arg) {
+		integerExpressionCount++;
 		return ast;
 	}
 
@@ -570,66 +588,29 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-//	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
-//		// the only case we know how to deal with for now is two IntegerExpressions
-//		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
-//			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
-//			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
-//			Object foldedValue = null;
-//			
-//			if (o.decl == StdEnvironment.addDecl) {
-//				foldedValue = int1 + int2;
-//			}
-//
-//			if (foldedValue instanceof Integer) {
-//				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-//				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-//				ie.type = StdEnvironment.integerType;
-//				return ie;
-//			} else if (foldedValue instanceof Boolean) {
-//				/* currently not handled! */
-//			}
-//		}
-//
-//		// any unhandled situation (i.e., not foldable) is ignored
-//		return null;
-//	}
-	
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
-	    // the only cases we know how to deal with for now are two IntegerExpressions or two BooleanExpressions
-	    if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
-	        int int1 = Integer.parseInt(((IntegerExpression) node1).IL.spelling);
-	        int int2 = Integer.parseInt(((IntegerExpression) node2).IL.spelling);
-	        Object foldedValue = null;
+		// the only case we know how to deal with for now is two IntegerExpressions
+		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
+			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
+			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
+			Object foldedValue = null;
+			
+			if (o.decl == StdEnvironment.addDecl) {
+				foldedValue = int1 + int2;
+			}
 
-	        if (o.decl == StdEnvironment.addDecl) {
-	            foldedValue = int1 + int2;
-	        } else if (o.decl == StdEnvironment.equalDecl) {
-	            foldedValue = int1 == int2;
-	        } else if (o.decl == StdEnvironment.lessDecl) {
-	            foldedValue = int1 < int2;
-	            System.out.println(o.decl);
-	        } 
-	        
-	        if (foldedValue instanceof Integer) {
-	            IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-	            IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-	            ie.type = StdEnvironment.integerType;
-	            return ie;
-	        }else if (foldedValue instanceof Boolean) {
-	            // Handle boolean case
-	            String booleanSpelling = ((Boolean) foldedValue) ? "true" : "false";
-	            Identifier identifier = new Identifier(booleanSpelling, node1.getPosition());
-	            SimpleVname simpleVName = new SimpleVname(identifier, node1.getPosition());
-	            VnameExpression ve = new VnameExpression(simpleVName, node1.getPosition());
-	            ve.type = StdEnvironment.booleanType;
-	            return ve;
-	        }
-	    }
+			if (foldedValue instanceof Integer) {
+				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
+				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+				ie.type = StdEnvironment.integerType;
+				return ie;
+			} else if (foldedValue instanceof Boolean) {
+				/* currently not handled! */
+			}
+		}
 
-	    // any unhandled situation (i.e., not foldable) is ignored
-	    return null;
+		// any unhandled situation (i.e., not foldable) is ignored
+		return null;
 	}
-
 
 }

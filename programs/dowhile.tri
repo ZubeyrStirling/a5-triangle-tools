@@ -1,0 +1,6 @@
+let
+  var a: Integer;
+in
+begin
+  a := 0;
+end

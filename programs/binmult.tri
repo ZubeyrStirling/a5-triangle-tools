@@ -1,0 +1,8 @@
+let
+    var a: Integer
+in
+{
+    a := 10;
+    a**;
+    putint(a);
+}

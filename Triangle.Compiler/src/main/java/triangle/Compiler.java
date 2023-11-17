@@ -19,10 +19,17 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryStatistics;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import java.io.StringReader;
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+import com.opencsv.CSVReader;
+import java.util.List;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -35,8 +42,19 @@ public class Compiler {
 	/** The filename for the object program, normally obj.tam. */
 	static String objectName = "obj.tam";
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	@Argument(alias = "showTree", description = "Shows AST", required = false)
+	private static boolean showTree = false;
+	@Argument(alias = "folding", description = "fold constant", required = false)
+	private static boolean folding = false;
+	@Argument(alias = "foldingAndShowTree", description = "fold constant and show AST", required = false)
+	private static boolean foldingAndShowTree = false;
+	@Argument(alias = "count", description = "count", required = false)
+	private static boolean count = false;
+	@Argument(alias = "-o", description = "-o", required = true)
+	private static boolean o = false;
+
+
+	
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -96,6 +114,24 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
+			if(foldingAndShowTree) {
+				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
+			}
+			
+			if(count) {
+				
+				
+				SummaryStatistics ss = new SummaryStatistics();
+				
+				theAST.visit(ss);
+				
+			    int cc = ss.getCharacterExpressionCount();
+			    int ic = ss.getIntegerExpressionCount();
+
+			    System.out.println("Character Expressions: " + cc);
+			    System.out.println("Integer Expressions: " + ic);
+			}
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -120,15 +156,27 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-
+		
+		Compiler compiler = new Compiler();
+		
+		
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-o outputfilename] [tree] [folding] [foldingAndShowTree] [count]");
 			System.exit(1);
 		}
 		
-		parseArgs(args);
+		
+		List<String> parsed = Args.parseOrExit(compiler, args);
+		   
+		
 
+     
+	    
+		
+	    parseArgs(parsed);
+	    
 		String sourceName = args[0];
+		
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
@@ -137,16 +185,40 @@ public class Compiler {
 		}
 	}
 	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
+	
+	
+//	private static void parseArgs(List<String> args) {
+//	    
+//		for (String s : args) {
+//			var sl = s.toLowerCase();
+//			if (sl.equals("tree")) {
+//				showTree = true;
+//			} else if (sl.startsWith("-o=")) {
+//				System.out.println(sl);
+//				objectName = s.substring(3);
+//			} else if (sl.equals("folding")) {
+//				folding = true;
+//			} else if (sl.equals("foldingAndShowTree")) {
+//				foldingAndShowTree = true;
+//			}
+//			else if (sl.equals("count")) {
+//				count = true;
+//			}
+//			
+//		}
+//	}
+	
+	private static void parseArgs(List<String> args) {
+	for (String s : args) {
+		var sl = s.toLowerCase();
+		if (sl.equals("tree")) {
+			showTree = true;
+		} else if (sl.endsWith("tam")) {
+			objectName = sl;
+		} else if (sl.equals("folding")) {
+			folding = true;
 		}
 	}
+}
+	
 }

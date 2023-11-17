@@ -618,6 +618,7 @@ public class Interpreter {
 		} catch (FileNotFoundException s) {
 			CT = CB;
 			System.err.println("Error opening object file: " + s);
+			s.printStackTrace();
 		} catch (IOException s) {
 			CT = CB;
 			System.err.println("Error reading object file: " + s);

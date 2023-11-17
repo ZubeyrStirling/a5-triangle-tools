@@ -22,26 +22,61 @@ public class TestScanner {
 
 	@Test
 	public void testHiNewComment() {
-		compileExpectFailure("/hi-newcomment.tri");
+		compileExpectSuccess("/hi-newcomment.tri");
 	}
+	
+	@Test
+	public void testdouble() {
+		compileExpectSuccess("/binmult.tri");
+	}
+	
+	@Test
+	public void testcurly() {
+		compileExpectSuccess("/while-curly.tri");
+	}
+
+//	@Test
+//	public void testHiNewComment() {
+//		compileExpectFailure("/hi-newcomment.tri");
+//	}
 	
 
 	@Test
 	public void testHiNewComment2() {
-		compileExpectFailure("/hi-newcomment2.tri");
+		compileExpectSuccess("/hi-newcomment2.tri");
 	}
+
+	//	@Test
+//	public void testHiNewComment2() {
+//		compileExpectFailure("/hi-newcomment2.tri");
+//	}
 	
 
 	@Test
 	public void testBarDemo() {
-		compileExpectFailure("/bardemo.tri");
+		compileExpectSuccess("/bardemo.tri");
 	}
+
+//	@Test
+//	public void testBarDemo() {
+//		compileExpectFailure("/bardemo.tri");
+//	}
 	
 
 	@Test
 	public void testRepeatUntil() {
-		compileExpectFailure("/repeatuntil.tri");
+		compileExpectSuccess("/repeatuntil.tri");
 	}
+
+//	@Test
+//	public void testRepeatUntil() {
+//		compileExpectFailure("/repeatuntil.tri");
+//	}
+
+//	@Test
+//	public void testAdd() {
+//		compileExpectFailure("/add.tri");
+//	}
 	
 	
 	
